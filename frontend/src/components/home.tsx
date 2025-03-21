@@ -8,6 +8,7 @@ import Footer from "./landing/Footer";
 import { BentoGridThirdDemo } from "./ui/Aceternity/bento-grid-demo";
 import { GlowingEffectDemo } from "./ui/Aceternity/GlowingEffectDemo";
 import Pricing from "./landing/Pricing";
+import FAQSection from "./landing/FAQAccordion";
 // import FAQSection from "./landing/FAQSection";
 
 const Home = () => {
@@ -50,7 +51,7 @@ const Home = () => {
       {/* Pricing Section - Could be added here */}
      <Pricing/>
       {/* FAQ Section */}
-      {/* <FAQSection/> */}
+      <FAQSection/>
       {/* Footer */}
       <Footer />
     </div>
