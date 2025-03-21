@@ -113,7 +113,8 @@ const AccountPage = () => {
       <Sidebar activePath="/dashboard/account" />
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        <DashboardHeader title="Account Settings" />
+        {/* <DashboardHeader title="Account Settings" /> */}
+        <DashboardHeader />
 
         <main className="flex-1 overflow-y-auto p-6">
           <div className="max-w-4xl mx-auto">

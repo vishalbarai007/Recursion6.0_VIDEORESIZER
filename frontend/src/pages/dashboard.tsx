@@ -7,6 +7,7 @@ import VideoPreview from "../components/dashboard/VideoPreview";
 import PlatformTabs from "../components/dashboard/PlatformTabs";
 import ProcessingControls from "../components/dashboard/ProcessingControls";
 import VideoHistory from "../components/dashboard/VideoHistory";
+import { VideoProvider } from "@/components/dashboard/VideoContext";
 
 interface PlatformSettings {
   aspectRatio: string;
@@ -61,6 +62,7 @@ const Dashboard = () => {
   };
 
   return (
+    <VideoProvider>
     <div className="min-h-screen bg-gray-50">
       <Helmet>
         <title>Dashboard | VideoAI Resizer</title>
@@ -119,6 +121,7 @@ const Dashboard = () => {
         </div>
       </div>
     </div>
+    </VideoProvider>
   );
 };
 

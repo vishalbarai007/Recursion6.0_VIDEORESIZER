@@ -6,6 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useVideoContext } from "./VideoContext";
 import {
 	Tooltip,
 	TooltipContent,
@@ -14,6 +15,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Info, Youtube, Instagram, Music, Settings2 } from "lucide-react";
 import { processVideo } from "@/lib/api";
+
 
 export interface PlatformTabsProps {
 	onPlatformChange?: (platform: string) => void;
@@ -69,7 +71,7 @@ const PlatformTabs: React.FC<PlatformTabsProps> = ({
 	onSettingsChange = () => {},
 	selectedPlatform = "youtube",
 	settings = defaultSettings.youtube,
-	videoFilePath = "", // Add videoFilePath to props
+	// videoFilePath = "", // Add videoFilePath to props
 }) => {
 	const handlePlatformChange = (value: string) => {
 		onPlatformChange(value);
@@ -86,38 +88,34 @@ const PlatformTabs: React.FC<PlatformTabsProps> = ({
 		onSettingsChange(newSettings);
 	};
 
+	const { videoFilePath } = useVideoContext();
+
 	const handleApplySettings = async () => {
 		if (!videoFilePath) {
-			alert("No video file selected. Please upload a video first.");
-			return;
+		  alert("No video file selected. Please upload a video first.");
+		  return;
 		}
-
+	
 		try {
-			// Prepare processing settings
-			const processingSettings = {
-				file_path: videoFilePath, // Use the videoFilePath prop
-				format: "mp4", // Default format
-				aspect_ratio: settings.aspectRatio,
-				auto_caption: settings.autoCaption,
-				resolution: settings.resolution,
-			};
-
-			// Call the backend to process the video
-			const result = await processVideo(videoFilePath, processingSettings);
-
-			if (result.error) {
-				alert(`Error processing video: ${result.error}`);
-			} else {
-				alert(
-					`Video processed successfully! Output path: ${result.data.output_path}`,
-				);
-			}
+		  const processingSettings = {
+			file_path: videoFilePath,
+			format: "mp4",
+			aspect_ratio: settings.aspectRatio,
+			auto_caption: settings.autoCaption,
+			resolution: settings.resolution,
+		  };
+	
+		  const result = await processVideo(videoFilePath, processingSettings);
+	
+		  if (result.error) {
+			alert(`Error processing video: ${result.error}`);
+		  } else {
+			alert(`Video processed successfully! Output path: ${result.data.output_path}`);
+		  }
 		} catch (error) {
-			alert(
-				`Error processing video: ${error instanceof Error ? error.message : "Unknown error"}`,
-			);
+		  alert(`Error processing video: ${error instanceof Error ? error.message : "Unknown error"}`);
 		}
-	};
+	  };
 
 	return (
 		<Card className="w-full h-full bg-white shadow-sm">

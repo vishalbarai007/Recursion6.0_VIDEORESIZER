@@ -5,6 +5,7 @@ import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
+import { useVideoContext } from "./VideoContext";
 
 // Define the API functions
 interface UploadResult {
@@ -152,6 +153,37 @@ const UploadSection = ({
     }
   };
 
+
+  // Get the context's setter for the video file path
+  const { setVideoFilePath } = useVideoContext();
+
+
+  // const handleUpload = async (validFiles: File[]) => {
+  //   if (validFiles.length === 0) return;
+
+  //   setIsUploading(true);
+  //   setUploadProgress(0);
+
+  //   try {
+  //     // Upload the first file
+  //     const result = await uploadVideo(validFiles[0], (progress) => {
+  //       setUploadProgress(progress);
+  //     });
+
+  //     if (result.error) {
+  //       setError(result.error);
+  //     } else {
+  //       // Call the parent component's callback with the uploaded files and file path
+  //       onFileUpload(validFiles, result.data.file_path);
+  //     }
+  //   } catch (err) {
+  //     setError(err instanceof Error ? err.message : "Upload failed");
+  //   } finally {
+  //     setIsUploading(false);
+  //   }
+  // };
+
+
   const handleUpload = async (validFiles: File[]) => {
     if (validFiles.length === 0) return;
 
@@ -167,7 +199,10 @@ const UploadSection = ({
       if (result.error) {
         setError(result.error);
       } else {
-        // Call the parent component's callback with the uploaded files and file path
+        // Save the video file path in context for global access
+        setVideoFilePath(result.data.file_path);
+
+        // Optionally call the parent's callback if needed
         onFileUpload(validFiles, result.data.file_path);
       }
     } catch (err) {
@@ -176,6 +211,19 @@ const UploadSection = ({
       setIsUploading(false);
     }
   };
+
+  const handleFileInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target.files && e.target.files.length > 0) {
+        const validFiles = validateFiles(e.target.files);
+        if (validFiles.length > 0) {
+          setFiles(validFiles);
+          handleUpload(validFiles);
+        }
+      }
+    },
+    [onFileUpload, settings],
+  );
 
   const handleLinkUpload = async () => {
     if (!validateUrl(videoUrl)) return;
@@ -218,18 +266,18 @@ const UploadSection = ({
     [onFileUpload, settings],
   );
 
-  const handleFileInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (e.target.files && e.target.files.length > 0) {
-        const validFiles = validateFiles(e.target.files);
-        if (validFiles.length > 0) {
-          setFiles(validFiles);
-          handleUpload(validFiles);
-        }
-      }
-    },
-    [onFileUpload, settings],
-  );
+  // const handleFileInputChange = useCallback(
+  //   (e: React.ChangeEvent<HTMLInputElement>) => {
+  //     if (e.target.files && e.target.files.length > 0) {
+  //       const validFiles = validateFiles(e.target.files);
+  //       if (validFiles.length > 0) {
+  //         setFiles(validFiles);
+  //         handleUpload(validFiles);
+  //       }
+  //     }
+  //   },
+  //   [onFileUpload, settings],
+  // );
 
   return (
     <div className="w-full bg-white p-4 sm:p-6 rounded-lg shadow-sm">
@@ -262,8 +310,7 @@ const UploadSection = ({
               type="file"
               className="hidden"
               accept={settings.supportedFormats.join(",")}
-              onChange={handleFileInputChange}
-              multiple
+              onChange={handleFileInputChange}              multiple
               disabled={isUploading}
             />
 
