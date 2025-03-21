@@ -103,7 +103,7 @@ const PlatformTabs: React.FC<PlatformTabsProps> = ({
 			};
 
 			// Call the backend to process the video
-			const result = await processVideo(processingSettings);
+			const result = await processVideo(videoFilePath, processingSettings);
 
 			if (result.error) {
 				alert(`Error processing video: ${result.error}`);
