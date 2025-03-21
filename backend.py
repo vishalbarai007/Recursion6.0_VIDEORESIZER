@@ -6,10 +6,17 @@ from moviepy.video.tools.subtitles import SubtitlesClip
 import uuid
 import re
 import whisper
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 
-os.makedirs("output", exist_ok=True)
+# Ensure upload and output directories exist
+UPLOAD_FOLDER = "uploads"
+OUTPUT_FOLDER = "output"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(OUTPUT_FOLDER, exist_ok=True)
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+app.config["OUTPUT_FOLDER"] = OUTPUT_FOLDER
 
 # Load Whisper model
 try:
@@ -17,6 +24,36 @@ try:
 except Exception as e:
     stt_model = None
     print(f"Warning: Whisper model could not be loaded. Auto-captioning will be disabled. Error: {e}")
+
+# Helper function to validate file extensions
+ALLOWED_EXTENSIONS = {"mp4", "mov", "avi", "mkv", "webm"}
+
+def allowed_file(filename):
+    return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route("/upload", methods=["POST"])
+def upload_file():
+    """Handles file upload from the frontend."""
+    if "file" not in request.files:
+        return jsonify({"error": "No file part"}), 400
+
+    file = request.files["file"]
+
+    if file.filename == "":
+        return jsonify({"error": "No selected file"}), 400
+
+    if not allowed_file(file.filename):
+        return jsonify({"error": "File type not allowed"}), 400
+
+    # Save the file to the upload folder
+    filename = secure_filename(file.filename)
+    file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+    file.save(file_path)
+
+    return jsonify({
+        "message": "File uploaded successfully",
+        "file_path": file_path
+    })
 
 @app.route("/get_resolution", methods=["POST"])
 def get_resolution():
@@ -119,11 +156,9 @@ def overlay_captions(video_path, captions, output_path):
             # Increase font size for portrait mode
             font_size = int(base_font_size * 2)  # Adjust multiplier as needed
             subtitle_margin = 300  # Distance from the bottom of the screen
-
         else:
             font_size = base_font_size
             subtitle_margin = 50  # Distance from the bottom of the screen
-
 
         # Define subtitle width (80% of video width to allow for margins)
         subtitle_width = int(original_width * 0.8)
@@ -184,7 +219,7 @@ def process_video():
 
         # Generate unique output filename
         output_filename = f"output_{uuid.uuid4().hex}.{format_type}"
-        output_path = os.path.join("output", output_filename)
+        output_path = os.path.join(app.config["OUTPUT_FOLDER"], output_filename)
 
         # Resize the video
         if not custom_mode:
