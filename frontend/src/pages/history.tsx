@@ -93,7 +93,7 @@ const HistoryPage = () => {
                       <SelectValue placeholder="Platform" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Platforms</SelectItem>
+                      <SelectItem value="platform">All Platforms</SelectItem>
                       <SelectItem value="youtube">YouTube</SelectItem>
                       <SelectItem value="instagram">Instagram</SelectItem>
                       <SelectItem value="tiktok">TikTok</SelectItem>
