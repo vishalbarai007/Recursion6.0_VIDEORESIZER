@@ -23,7 +23,6 @@ interface ProcessingControlsProps {
 	selectedPlatform?: string;
 	platformSettings?: any;
 	videoId?: string;
-	videoFilePath?: string; // Add videoFilePath to props
 }
 
 const ProcessingControls = ({
@@ -40,10 +39,8 @@ const ProcessingControls = ({
 	selectedPlatform = "youtube",
 	platformSettings = {},
 	videoId = "",
-	videoFilePath = "", // Add videoFilePath to props
 }: ProcessingControlsProps) => {
 	const [isProcessed, setIsProcessed] = useState(false);
-	const [processedVideoPath, setProcessedVideoPath] = useState(""); // Store the processed video path
 
 	useEffect(() => {
 		if (processingProgress >= 100) {
@@ -53,25 +50,20 @@ const ProcessingControls = ({
 
 	// Handle video processing with the Flask backend
 	const handleProcess = async () => {
-		if (!isVideoUploaded || !videoFilePath) return;
+		if (!isVideoUploaded || !videoId) return;
 
 		setIsProcessing(true);
 		setProcessingProgress(0);
 		setIsProcessed(false);
 
 		try {
-			// Prepare processing settings
-			const settings = {
-				format: "mp4", // Default format
-				aspect_ratio: platformSettings.aspectRatio || "16:9", // Default aspect ratio
-				auto_caption: platformSettings.autoCaption || false, // Default auto-captioning
-				resolution: platformSettings.resolution || "100%", // Default resolution
-			};
-
 			// Call the API to process the video
 			const result = await processVideo(
-				videoFilePath, // Pass the video file path
-				settings,
+				videoId,
+				{
+					platform: selectedPlatform,
+					...platformSettings,
+				},
 				(progress) => {
 					setProcessingProgress(progress);
 				},
@@ -80,52 +72,36 @@ const ProcessingControls = ({
 			if (result.error) {
 				console.error("Processing error:", result.error);
 			} else {
-				// Update the processed video path
-				setProcessedVideoPath(result.data.output_path);
 				// Call the parent component's callback
 				onProcess();
 			}
 		} catch (err) {
 			console.error("Processing error:", err);
-		} finally {
-			setIsProcessing(false);
 		}
 	};
 
 	const handleDownload = () => {
-		if (processedVideoPath) {
-			// Trigger download of the processed video
-			const link = document.createElement("a");
-			link.href = processedVideoPath;
-			link.download = `processed_video_${videoId}.mp4`;
-			link.click();
-		} else {
-			alert("No processed video available for download.");
-		}
+		// In a real implementation, this would download the processed video
+		onDownload();
+		alert(
+			"Download started! In a real implementation, this would download the processed video.",
+		);
 	};
 
 	const handleShare = () => {
-		if (processedVideoPath) {
-			// In a real implementation, this would open a share dialog
-			onShare();
-			alert(
-				`Share dialog would open here. Processed video URL: ${processedVideoPath}`,
-			);
-		} else {
-			alert("No processed video available for sharing.");
-		}
+		// In a real implementation, this would open a share dialog
+		onShare();
+		alert(
+			"Share dialog would open here. In a real implementation, this would allow sharing to social media.",
+		);
 	};
 
 	const handleSaveToCloud = () => {
-		if (processedVideoPath) {
-			// In a real implementation, this would save to cloud storage
-			onSaveToCloud();
-			alert(
-				`Saving to cloud! Processed video URL: ${processedVideoPath}`,
-			);
-		} else {
-			alert("No processed video available to save to cloud.");
-		}
+		// In a real implementation, this would save to cloud storage
+		onSaveToCloud();
+		alert(
+			"Saving to cloud! In a real implementation, this would save to your cloud storage.",
+		);
 	};
 
 	return (

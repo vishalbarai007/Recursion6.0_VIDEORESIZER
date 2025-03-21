@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { uploadVideo } from "@/lib/api";
 
 interface UploadSectionProps {
-	onFileUpload?: (files: File[]) => void; // Add this prop
+	onFileUpload?: (files: File[], filePath: string) => void; // Updated to include filePath
 	supportedFormats?: string[];
 	maxFileSize?: number;
 	isUploading?: boolean;
@@ -84,7 +84,7 @@ const UploadSection = ({
 		setUploadProgress(0);
 
 		try {
-			// Upload the first file (in a real app, you might want to handle multiple files)
+			// Upload the first file
 			const result = await uploadVideo(validFiles[0], (progress) => {
 				setUploadProgress(progress);
 			});
@@ -92,8 +92,8 @@ const UploadSection = ({
 			if (result.error) {
 				setError(result.error);
 			} else {
-				// Call the parent component's callback with the uploaded files
-				onFileUpload(validFiles);
+				// Call the parent component's callback with the uploaded files and file path
+				onFileUpload(validFiles, result.data.file_path);
 			}
 		} catch (err) {
 			setError(err instanceof Error ? err.message : "Upload failed");
